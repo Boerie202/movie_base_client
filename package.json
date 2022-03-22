@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/Boerie202/movie_base_client#readme",
   "dependencies": {
+    "axios": "^0.24.0",
     "prop-types": "^15.8.1",
     "react": "^17.0.2",
     "react-bootstrap": "^2.2.1",
