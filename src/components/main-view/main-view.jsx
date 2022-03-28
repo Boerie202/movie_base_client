@@ -39,24 +39,50 @@ export class MainView extends React.Component {
         });
     }
 
+    /* When a user successfully logs in, this function updates the `user` property in state to that *particular user*/
+    onLoggedIn(authData) {
+        console.log(authData);
+        this.setState({
+            user: authData.user.Username
+        });
+
+        localStorage.setItem('token', authData.token);
+        localStorage.setItem('user', authData.user.Username);
+        this.getMovies(authData.token);
+    }
+
     //When a user is able to successfully register
     onRegistration(register) {
         this.setState({ register, });
     }
 
-    /* When a user successfully logs in, this function updates the `user` property in state to that *particular user*/
-    onLoggedIn(user) {
-        this.setState({ user });
+
+
+
+
+    getMovies(token) {
+        axios.get('https://movie-base-og.herokuapp.com/movies', {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then(response => {
+                // Assign the result to the state
+                this.setState({
+                    movies: response.data
+                });
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
     }
 
     render() {
         const { movies, selectedMovie, user, register } = this.state;
 
-        if (!register) return (<RegistrationView onRegistration={(register) => this.onRegistration(register)} />);
-
-
         /* If there is no user, the LoginView is rendered. If there is a user logged in, the user details are *passed as a prop to the LoginView*/
         if (!user) return <LoginView onLoggedIn={user => this.onLoggedIn(user)} />;
+
+        if (!register) return (<RegistrationView onRegistration={(register) => this.onRegistration(register)} />);
+
 
         if (movies.length === 0) return <div className="main-view" />;
 

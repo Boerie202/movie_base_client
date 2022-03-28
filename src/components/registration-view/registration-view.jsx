@@ -10,6 +10,8 @@ export function RegistrationView(props) {
     const [email, setEmail] = useState('');
     const [Birthday, setBirthday] = useState('');
 
+
+
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log(username, password, email, Birthday);
@@ -24,7 +26,7 @@ export function RegistrationView(props) {
                 <CardGroup>
                     <Card className="registerCard">
                         <Card.Body>
-                            <Card.Title className="text-center">Welcome to Movie Base.</Card.Title>
+                            <Card.Title className="text-center">New User Registration.</Card.Title>
                             <Card.Subtitle className="mb-2 text-muted text-center">Please Register</Card.Subtitle>
 
                             <Form>
