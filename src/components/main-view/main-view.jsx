@@ -4,8 +4,8 @@ import { RegistrationView } from '../registration-view/registration-view';
 import { LoginView } from '../login-view/login-view';
 import { MovieCard } from '../movie-card/movie-card';
 import { MovieView } from '../movie-view/movie-view';
-import Row from 'react-bootstrap/Row'
-import Col from 'react-bootstrap/Col';
+import { Row, Col, } from 'react-bootstrap/Row'
+
 
 
 
@@ -16,34 +16,17 @@ export class MainView extends React.Component {
         this.state = {
             movies: [],// set to an empty array to be fetched using axios library
             selectedMovie: null,
-            user: null
+            user: null,
+            register: false
         }
-    }
-
-
-    componentDidMount() {
-        axios.get('https://movie-base-og.herokuapp.com/movies')
-            .then(response => {
-                this.setState({
-                    movies: response.data
-                });
-            })
-            .catch(error => {
-                console.log(error);
-            });
-    }
-
-    setSelectedMovie(newSelectedMovie) {
-        this.setState({
-            selectedMovie: newSelectedMovie
-        });
     }
 
     /* When a user successfully logs in, this function updates the `user` property in state to that *particular user*/
     onLoggedIn(authData) {
         console.log(authData);
         this.setState({
-            user: authData.user.Username
+            user: authData.user.Username,
+            register: false
         });
 
         localStorage.setItem('token', authData.token);
@@ -56,9 +39,25 @@ export class MainView extends React.Component {
         this.setState({ register, });
     }
 
+    componentDidMount() {
+        if (this.state.user) {
+            axios.get('https://movie-base-og.herokuapp.com/movies')
+                .then(response => {
+                    this.setState({
+                        movies: response.data
+                    });
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+        }
+    }
 
-
-
+    setSelectedMovie(newSelectedMovie) {
+        this.setState({
+            selectedMovie: newSelectedMovie
+        });
+    }
 
     getMovies(token) {
         axios.get('https://movie-base-og.herokuapp.com/movies', {
@@ -81,7 +80,7 @@ export class MainView extends React.Component {
         /* If there is no user, the LoginView is rendered. If there is a user logged in, the user details are *passed as a prop to the LoginView*/
         if (!user) return <LoginView onLoggedIn={user => this.onLoggedIn(user)} />;
 
-        if (!register) return (<RegistrationView onRegistration={(register) => this.onRegistration(register)} />);
+        if (!user && !register) return (<RegistrationView onRegistration={(register) => this.onRegistration(register)} />);
 
 
         if (movies.length === 0) return <div className="main-view" />;
@@ -91,6 +90,7 @@ export class MainView extends React.Component {
 
 
             <Row className="main-view justify-content-md-center">
+
                 {selectedMovie
                     ? (
                         <Col md={8}>
