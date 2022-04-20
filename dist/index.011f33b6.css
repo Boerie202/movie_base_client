@@ -57,6 +57,9 @@
   object-fit: cover;
 }
 
+.nav-bar {
+  padding-bottom: 20px;
+}
 .movie-base {
   color: steelblue;
 }

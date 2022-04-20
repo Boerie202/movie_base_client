@@ -1,12 +1,19 @@
 import React from 'react';
 import axios from 'axios';//Axios should be imported
+
+
 import { RegistrationView } from '../registration-view/registration-view';
 import { LoginView } from '../login-view/login-view';
 import { MovieCard } from '../movie-card/movie-card';
 import { MovieView } from '../movie-view/movie-view';
+import { DirectorView } from '../director-view/director-view';
+import { GenreView } from '../genre-view/genre-view';
+import { ProfileView } from '../profile-view/profile-view';
+import { NavView } from '../nav-view/nav-view';
+
+
 import { Row, Col, Container } from 'react-bootstrap'
-
-
+import { BrowserRouter as Router, Route, Redirect } from "react-router-dom";
 
 
 export class MainView extends React.Component {
@@ -17,7 +24,7 @@ export class MainView extends React.Component {
             movies: [],// set to an empty array to be fetched using axios library
             selectedMovie: null,
             user: null,
-            register: false
+
         }
     }
 
@@ -34,10 +41,10 @@ export class MainView extends React.Component {
         this.getMovies(authData.token);
     }
 
-    //When a user is able to successfully register
-    onRegistration(register) {
-        this.setState({ register, });
-    }
+    // When a user is able to successfully register
+    // onRegistration(register) {
+    //     this.setState({ register, });
+    // }
 
     componentDidMount() {
         if (this.state.user) {
@@ -50,6 +57,15 @@ export class MainView extends React.Component {
                 .catch(error => {
                     console.log(error);
                 });
+
+        }
+
+        let accessToken = localStorage.getItem('token');
+        if (accessToken !== null) {
+            this.setState({
+                user: localStorage.getItem('user')
+            });
+            this.getMovies(accessToken);
         }
     }
 
@@ -74,37 +90,140 @@ export class MainView extends React.Component {
             });
     }
 
+
+    onLoggedOut() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        this.setState({
+            user: null
+        });
+    }
+
     render() {
-        const { movies, selectedMovie, user, register } = this.state;
-
-        /* If there is no user, the LoginView is rendered. If there is a user logged in, the user details are *passed as a prop to the LoginView*/
-        if (!user) return <LoginView onLoggedIn={user => this.onLoggedIn(user)} />;
-
-        if (!user && !register) return (<RegistrationView onRegistration={(register) => this.onRegistration(register)} />);
-
-
-        if (movies.length === 0) return <div className="main-view" />;
-
+        const { movies, user } = this.state;
 
         return (
             //TODO : see later 
-            <Container>
+            <Router>
+                <Row>
+                    <NavView user={user} />
+                </Row>
+                {/* <Container> */}
                 <Row className="main-view justify-content-md-center">
 
-                    {selectedMovie
-                        ? (
-                            <Col md={8}>
-                                <MovieView movie={selectedMovie} onBackClick={newSelectedMovie => { this.setSelectedMovie(newSelectedMovie); }} />
+                    <Route exact path="/" render={() => {
+                        if (!user) return <Col>
+                            <LoginView onLoggedIn={user => this.onLoggedIn(user)} />
+                        </Col>
+                        if (movies.length === 0) return <div className="main-view" />;
+                        return movies.map(m => (
+                            <Col md={4} key={m._id} className='movie-cards'>
+                                <MovieCard movie={m} />
+
                             </Col>
-                        )
-                        : movies.map(movie => (
-                            <Col md={3}>
-                                <MovieCard key={movie._id} movie={movie} onMovieClick={newSelectedMovie => { this.setSelectedMovie(newSelectedMovie); }} />
-                            </Col>
+
                         ))
-                    }
+
+                    }} />
+
+                    <Route path="/register" render={() => {
+                        if (user) return <Redirect to="/" />
+                        return <Col>
+                            <RegistrationView />
+                        </Col>
+                    }} />
+
+
+                    <Route exact path="/movies/:movieId" render={({ match, history }) => {
+
+                        return (<Col md={8}>
+                            <MovieView movie={movies.find(m => m._id === match.params.movieId)} onBackClick={() => history.goBack()} />
+                        </Col>
+                        )
+                    }} />
+
                 </Row>
-            </Container>
+
+                {/* Profile View */}
+                <Route exact path="/profile" render={({ history }) => {
+                    if (!user) {
+                        return (
+                            <Col>
+                                <LoginView onLoggedIn={user => this.onLoggedIn(user)} />
+                            </Col>
+                        );
+                    }
+
+                    return (
+                        <Col md={8}>
+                            <ProfileView movies={movies} onBackClick={() => history.goBack()} />
+                        </Col>
+                    );
+                }} />
+
+                {/* Genre View */}
+
+                <Route path="/genre/:name" render={({ match, history }) => {
+                    if (!user) {
+                        return (
+                            <Col>
+                                <LoginView onLoggedIn={user => this.onLoggedIn(user)} />
+                            </Col>
+                        );
+                    }
+
+                    if (movies.length === 0) {
+                        return <div className="movie-view" />;
+                    }
+
+                    return (
+                        <Col md={8}>
+                            <GenreView
+                                genre={movies.find(m => m.Genre.Name === match.params.name).Genre}
+                                onBackClick={() => history.goBack()}
+                                movies={movies.filter(movie => movie.Genre.Name === match.params.name)} />
+                        </Col>
+                    );
+                }} />
+
+                {/* Director View */}
+                <Route exact path="/director/:name" render={({ match, history }) => {
+                    if (!user) {
+                        return (
+                            <Col>
+                                <LoginView onLoggedIn={user => this.onLoggedIn(user)} />
+                            </Col>
+                        );
+                    }
+
+                    if (movies.length === 0) {
+                        return <div className="movie-view" />;
+                    }
+
+                    return (
+                        <Col md={8}>
+                            <DirectorView
+                                director={movies.find(m => m.Director.Name === match.params.name).Director}
+                                onBackClick={() => history.goBack()}
+                                movies={movies.filter(movie => movie.Director.Name === match.params.name)} />
+                        </Col>
+                    );
+                }} />
+
+
+                <Route path={`/users/${user}`} render={({ history }) => {
+                    if (!user)
+                        return <Redirect to="/" />
+                    return <Col>
+                        <ProfileView user={user}
+                            onBackClick={() => history.goBack()} />
+                    </Col>
+                }} />
+                <Row>
+                    <button id="logout-button" onClick={() => { this.onLoggedOut() }}>Logout</button>
+                </Row>
+                {/* </Container> */}
+            </Router>
         );
     }
 }
