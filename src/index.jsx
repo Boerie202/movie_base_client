@@ -1,7 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { MainView } from './components/main-view/main-view';
 import Container from 'react-bootstrap/Container';
+
+//Redux imports
+import { devToolsEnhancer } from 'redux-devtools-extension';
+import { createStore } from 'redux';
+import { Provider } from 'react-redux';
+import moviesApp from './reducers/reducers';
+
+const store = createStore(moviesApp, devToolsEnhancer());
+
+import MainView from './components/main-view/main-view';
 
 // Import statement to indicate that you need to bundle `./index.scss`
 import './index.scss';
@@ -10,9 +19,11 @@ import './index.scss';
 class movieBaseApplication extends React.Component {
     render() {
         return (
-            <Container>
-                <MainView />
-            </Container>
+            <Provider store={store}>
+                <Container>
+                    <MainView />
+                </Container>
+            </Provider>
         );
     }
 }
