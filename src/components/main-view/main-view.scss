@@ -1,14 +1,20 @@
-*{
-    box-sizing: border-box;
-  }
-  
-  .main-view {
-    font-family: 'Fira Sans', sans-serif;
-    background: #5c1818;
-    width: 100%;
-    display: inline-block;
-  }
-  
-  .bg-navColor{
-    background: #000;
-  }
+* {
+  box-sizing: border-box;
+
+}
+
+.main-view {
+  font-family: 'Fira Sans', sans-serif;
+  background: #5c1818;
+  width: 100%;
+  padding-top: 20px;
+  display: inline-block;
+}
+
+.bg-navColor {
+  background: #000;
+}
+
+.movie-cards {
+  margin-top: 50px;
+}
